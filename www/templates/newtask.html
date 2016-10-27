@@ -1,0 +1,21 @@
+<ion-modal-view>
+  <ion-header-bar>
+    <h1 class="title">New Task</h1>
+    <div class="buttons">
+      <button class="button button-clear button-positive" ng-click="closeNewTask()"><i class="ion-close-round"></i></button>
+    </div>
+  </ion-header-bar>
+  <ion-content>
+    <form ng-submit="addTask(newTaskData)">
+      <div class="list">
+        <label class="item item-input">
+          <span class="input-label">Name</span>
+          <input type="text" ng-model="newTaskData.name">
+        </label>
+        <label class="item">
+          <button class="button button-block button-positive" type="submit" ng-disabled="dis">Add Task</button>
+        </label>
+      </div>
+    </form>
+  </ion-content>
+</ion-modal-view>

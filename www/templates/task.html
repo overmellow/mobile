@@ -1,0 +1,30 @@
+<ion-view view-title="Task">
+  <ion-content>
+
+  	<div class="card">
+	  <div class="item item-text-wrap">
+	    <label class="item item-input item-icon-right">
+		    <input type="text" placeholder="Task Name"  ng-model="task.name">
+	    </label>
+		<li class="item item-toggle">
+	     Completed
+	     <label class="toggle toggle-positive">
+	       <input type="checkbox"  ng-model="task.completed">
+	       <div class="track">
+	         <div class="handle"></div>
+	       </div>
+	     </label>
+	  </li>
+	  </div>
+	  <div class="item item-divider">
+	    <button class="button button-positive" ng-click="editTask(task)">
+		  Edit
+		</button>
+		<button class="button button-assertive" ng-click="deleteTask(task)">
+		  Delete
+		</button>
+	  </div>
+	</div>
+   
+  </ion-content>
+</ion-view>
