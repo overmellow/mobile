@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('AppCtrl', function($rootScope, $scope, $ionicModal, $timeout, TasksFactory, TF, $location) {
+.controller('AppCtrl', function($rootScope, $scope, $ionicModal, $timeout, $location, TasksFactory, TF, UF, AuthFactory, LSF) {
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -9,44 +9,60 @@ angular.module('starter.controllers', [])
   //$scope.$on('$ionicView.enter', function(e) {
   //});
   $scope.signedin = false;
-  $rootScope.$on('showLoginModal', function($event, scope, cancelCallback, callback) { 
-  // Form data for the login modal
-  $scope.loginData = {};
+  $rootScope.$on('showLoginModal',
+   function($event, scope, cancelCallback, callback) {
+    // Form data for the login modal
+    $scope.loginData = {};
 
-  // Create the login modal that we will use later
-  $ionicModal.fromTemplateUrl('templates/login.html', {
-    scope: $scope
-  }).then(function(modal) {
-    $scope.modal = modal;
+    // Create the login modal that we will use later
+    $ionicModal.fromTemplateUrl('templates/login.html', {
+      scope: $scope
+    }).then(function(modal) {
+      $scope.modal = modal;
+      $scope.modal.show();
+    });
+
+    // Triggered in the login modal to close it
+    $scope.closeLogin = function() {
+      $scope.modal.hide();
+    };
+
+    // Open the login modal
+    $scope.login = function() {
+      $scope.modal.show();
+    };
+
+    // Perform the login action when the user submits the login form
+    $scope.doLogin = function(loginData) {
+      UF.login(loginData)
+       .then(function(res){
+          console.log(res)          
+          AuthFactory.setUser(res.data.user);
+          AuthFactory.setToken(res.data.token);
+          $scope.$broadcast('userUpdate');
+          //$rootScope.isAuthenticated = true;
+          $scope.modal.hide();
+          $scope.signedin = true;
+          $location.path('/');          
+       }, function(err){
+        alert(err.data);
+       })
+    };
   });
 
-  // Triggered in the login modal to close it
-  $scope.closeLogin = function() {
-    $scope.modal.hide();
-  };
-
-  // Open the login modal
-  $scope.login = function() {
-    $scope.modal.show();
-  };
-
-  // Perform the login action when the user submits the login form
-  $scope.doLogin = function() {
-    console.log('Doing login', $scope.loginData);
-
-    // Simulate a login delay. Remove this and replace with your login
-    // code if using a login system
-    $timeout(function() {
-      $scope.closeLogin();
-    }, 1000);
-  };
-  });
-
-  $rootScope.loginFromMenu = function() {
+  $scope.loginForm = function(){
     $rootScope.$broadcast('showLoginModal', $scope, null, null);
   }
 
-  
+    if (!$scope.signedin) {
+      $rootScope.$broadcast('showLoginModal', $scope, null, null);
+      //$location.path('/test');
+    }        
+
+  $scope.logout = function(){
+    UF.logout();
+    $rootScope.$broadcast('showLoginModal', $scope, null, null);
+  }
 })
 
 .controller('TasksCtrl', function($scope, TF, TasksFactory, $ionicActionSheet, $ionicModal, $timeout, Loader, RF, $location) {
@@ -66,7 +82,14 @@ angular.module('starter.controllers', [])
        }).finally(function() {
        // Stop the ion-refresher from spinning
        $scope.$broadcast('scroll.refreshComplete');
-     });    
+     });
+
+   // listen for the event in the relevant $scope
+    $scope.$on('userUpdate', function (event) {
+      TasksFactory.allTasks(res.data);
+      $scope.tasks = TasksFactory.getTasks();
+      $scope.$apply();
+    });    
    }
 
     // Form data for the login modal
@@ -97,7 +120,7 @@ angular.module('starter.controllers', [])
         //MF.addMessage(res.data.message);
         //Loader.toggleLoadingWithMessage(null, null, RF.redirectTo);
         Loader.hideLoading();
-        $location.path('/')
+        $location.path('/app/tasks')
         TasksFactory.addTask(res.data.newtask);
         $scope.closeNewTask();
         $scope.newTaskData = {};
@@ -118,7 +141,7 @@ angular.module('starter.controllers', [])
       .then(function(res) {
         //MF.addMessage(res.data.message);
         Loader.toggleLoadingWithMessage(null, null, RF.redirectTo);
-        //$location.path('/')
+        $location.path('/app/tasks')
     });
   }
   
@@ -133,13 +156,25 @@ angular.module('starter.controllers', [])
           //MF.addMessage(res.data.message);
           //Loader.toggleLoadingWithMessage(null, null, RF.redirectTo);
           Loader.hideLoading();
-          $location.path('/')
+          $location.path('/app/tasks')
       });
     }   
   }
 })
 
-.controller('TestCtrl', function($scope) {
+.controller('TestCtrl', function($scope, AuthFactory) {
+  $scope.test = AuthFactory.getUser();
+
+  // listen for the event in the relevant $scope
+  $scope.$on('userUpdate', function (event) {
+    $scope.test = AuthFactory.getUser();
+  });
+
+  $scope.refreshTest = function(){
+    $scope.test = AuthFactory.getUser();
+    // Stop the ion-refresher from spinning
+    $scope.$broadcast('scroll.refreshComplete');
+  };
 })
 
  .constant('webserverurl', 'http://ec2-52-53-169-151.us-west-1.compute.amazonaws.com:3000/');

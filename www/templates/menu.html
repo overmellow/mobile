@@ -18,7 +18,7 @@
     </ion-header-bar>
     <ion-content>
       <ion-list>
-        <ion-item menu-close ng-click="loginFromMenu()">
+        <ion-item menu-close ng-click="loginForm()">
           Login
         </ion-item>
         <ion-item menu-close href="#/app/tasks">
@@ -26,6 +26,9 @@
         </ion-item>
         <ion-item menu-close href="#/app/test">
           Test
+        </ion-item>
+        <ion-item menu-close  ng-click="logout()">
+          Logout
         </ion-item>
       </ion-list>
     </ion-content>
